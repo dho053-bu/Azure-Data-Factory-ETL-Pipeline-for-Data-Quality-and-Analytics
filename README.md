@@ -53,3 +53,8 @@ This pipeline improves data reliability and ensures consistent, high-quality dat
 - Debugging ingestion and transformation issues
 - Implementing data validation and governance practices
 - Designing data workflows for analytics-ready datasets
+
+## Pipeline Screenshots
+
+### Pipeline Overview
+![Pipeline Overview](docs/pipeline-overview.png)
