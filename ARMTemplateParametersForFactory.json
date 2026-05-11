@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "value": "datafactorye40fa2"
+        },
+        "HttpServer1_password": {
+            "value": ""
+        },
+        "AzureBlobStorage1_connectionString": {
+            "value": ""
+        },
+        "SQL_dhComplaints_password": {
+            "value": ""
+        },
+        "AzureSqlDatabase1_password": {
+            "value": ""
+        },
+        "CosmosDB_TMDB_connectionString": {
+            "value": ""
+        },
+        "AzureDataLakeStorage1_accountKey": {
+            "value": ""
+        },
+        "HttpServer1_properties_typeProperties_url": {
+            "value": "https://static.nhtsa.gov/odi/ffdd/cmpl/FLAT_CMPL.zip"
+        },
+        "HttpServer1_properties_typeProperties_userName": {
+            "value": "dho053"
+        },
+        "SQL_dhComplaints_properties_typeProperties_server": {
+            "value": "dhmod4server.database.windows.net"
+        },
+        "SQL_dhComplaints_properties_typeProperties_database": {
+            "value": "dhmod4db"
+        },
+        "SQL_dhComplaints_properties_typeProperties_userName": {
+            "value": "omdsmod4admin"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_server": {
+            "value": "dhmod4server.database.windows.net"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_database": {
+            "value": "dhmod4db"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_userName": {
+            "value": "omdsmod4admin"
+        },
+        "AzureDataLakeStorage1_properties_typeProperties_url": {
+            "value": "https://dhoomdsrgsa.dfs.core.windows.net/"
+        }
+    }
+}

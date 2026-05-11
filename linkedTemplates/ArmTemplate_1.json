@@ -1,0 +1,775 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "datafactorye40fa2"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/pipeline1')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Copy_Data_Extract",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "BinarySource",
+                                "storeSettings": {
+                                    "type": "HttpReadSettings",
+                                    "requestMethod": "GET"
+                                },
+                                "formatSettings": {
+                                    "type": "BinaryReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "BinarySink",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageWriteSettings",
+                                    "copyBehavior": "PreserveHierarchy"
+                                }
+                            },
+                            "enableStaging": false
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "Binary1",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_ZIP_RAW",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Copy_Data_Unzip",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "Copy_Data_Extract",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "BinarySource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true
+                                },
+                                "formatSettings": {
+                                    "type": "BinaryReadSettings",
+                                    "compressionProperties": {
+                                        "type": "ZipDeflateReadSettings"
+                                    }
+                                }
+                            },
+                            "sink": {
+                                "type": "BinarySink",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageWriteSettings"
+                                }
+                            },
+                            "enableStaging": false
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_ZIP_SOURCE",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_ZIP_AS_TEXT",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Copy_Data_Parse",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "Copy_Data_Unzip",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "DelimitedTextSource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true,
+                                    "enablePartitionDiscovery": false
+                                },
+                                "formatSettings": {
+                                    "type": "DelimitedTextReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "writeBehavior": "insert",
+                                "sqlWriterUseTableLock": false,
+                                "tableOption": "autoCreate",
+                                "disableMetricsCollection": false
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "mappings": [
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 1
+                                        },
+                                        "sink": {
+                                            "name": "Column1",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 2
+                                        },
+                                        "sink": {
+                                            "name": "Column2",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 3
+                                        },
+                                        "sink": {
+                                            "name": "Column3",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 4
+                                        },
+                                        "sink": {
+                                            "name": "Column4",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 5
+                                        },
+                                        "sink": {
+                                            "name": "Column5",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 6
+                                        },
+                                        "sink": {
+                                            "name": "Column6",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 7
+                                        },
+                                        "sink": {
+                                            "name": "Column7",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 8
+                                        },
+                                        "sink": {
+                                            "name": "Column8",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 9
+                                        },
+                                        "sink": {
+                                            "name": "Column9",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 10
+                                        },
+                                        "sink": {
+                                            "name": "Column10",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 11
+                                        },
+                                        "sink": {
+                                            "name": "Column11",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 12
+                                        },
+                                        "sink": {
+                                            "name": "Column12",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 13
+                                        },
+                                        "sink": {
+                                            "name": "Column13",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 14
+                                        },
+                                        "sink": {
+                                            "name": "Column14",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 15
+                                        },
+                                        "sink": {
+                                            "name": "Column15",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 16
+                                        },
+                                        "sink": {
+                                            "name": "Column16",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 17
+                                        },
+                                        "sink": {
+                                            "name": "Column17",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 18
+                                        },
+                                        "sink": {
+                                            "name": "Column18",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 19
+                                        },
+                                        "sink": {
+                                            "name": "Column19",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 20
+                                        },
+                                        "sink": {
+                                            "name": "Column20",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 21
+                                        },
+                                        "sink": {
+                                            "name": "Column21",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 22
+                                        },
+                                        "sink": {
+                                            "name": "Column22",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 23
+                                        },
+                                        "sink": {
+                                            "name": "Column23",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 24
+                                        },
+                                        "sink": {
+                                            "name": "Column24",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 25
+                                        },
+                                        "sink": {
+                                            "name": "Column25",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 26
+                                        },
+                                        "sink": {
+                                            "name": "Column26",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 27
+                                        },
+                                        "sink": {
+                                            "name": "Column27",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 28
+                                        },
+                                        "sink": {
+                                            "name": "Column28",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 29
+                                        },
+                                        "sink": {
+                                            "name": "Column29",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 30
+                                        },
+                                        "sink": {
+                                            "name": "Column30",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 31
+                                        },
+                                        "sink": {
+                                            "name": "Column31",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 32
+                                        },
+                                        "sink": {
+                                            "name": "Column32",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 33
+                                        },
+                                        "sink": {
+                                            "name": "Column33",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 34
+                                        },
+                                        "sink": {
+                                            "name": "Column34",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 35
+                                        },
+                                        "sink": {
+                                            "name": "Column35",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 36
+                                        },
+                                        "sink": {
+                                            "name": "Column36",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 37
+                                        },
+                                        "sink": {
+                                            "name": "Column37",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 38
+                                        },
+                                        "sink": {
+                                            "name": "Column38",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 39
+                                        },
+                                        "sink": {
+                                            "name": "Column39",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 40
+                                        },
+                                        "sink": {
+                                            "name": "Column40",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 41
+                                        },
+                                        "sink": {
+                                            "name": "Column41",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 42
+                                        },
+                                        "sink": {
+                                            "name": "Column42",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 43
+                                        },
+                                        "sink": {
+                                            "name": "Column43",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 44
+                                        },
+                                        "sink": {
+                                            "name": "Column44",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 45
+                                        },
+                                        "sink": {
+                                            "name": "Column45",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 46
+                                        },
+                                        "sink": {
+                                            "name": "Column46",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 47
+                                        },
+                                        "sink": {
+                                            "name": "Column47",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 48
+                                        },
+                                        "sink": {
+                                            "name": "Column48",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "type": "String",
+                                            "ordinal": 49
+                                        },
+                                        "sink": {
+                                            "name": "Column49",
+                                            "type": "String",
+                                            "physicalType": "nvarchar"
+                                        }
+                                    }
+                                ],
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_DELIMITED_SOURCE",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "AzureSqlTable1",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "dataflow1",
+                        "type": "ExecuteDataFlow",
+                        "dependsOn": [
+                            {
+                                "activity": "Copy_Data_Parse",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataflow": {
+                                "referenceName": "dataflow1",
+                                "type": "DataFlowReference",
+                                "parameters": {},
+                                "datasetParameters": {
+                                    "source1": {},
+                                    "sink1": {}
+                                }
+                            },
+                            "staging": {},
+                            "compute": {
+                                "coreCount": 16,
+                                "computeType": "General"
+                            },
+                            "traceLevel": "Coarse"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-04-20T23:37:49Z"
+            },
+            "dependsOn": []
+        }
+    ]
+}
