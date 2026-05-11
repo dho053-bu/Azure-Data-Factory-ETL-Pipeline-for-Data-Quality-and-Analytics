@@ -36,8 +36,9 @@ The pipeline processes structured datasets, applies data cleaning and validation
 - Row count validation
 
 ## Repository Structure
-├── factory/ # ADF pipeline configurations
-├── linkedTemplates/ # ARM template dependencies
+.
+├── factory/                 # ADF pipeline configurations
+├── linkedTemplates/         # ARM template dependencies
 ├── ARMTemplateForFactory.json
 ├── ARMTemplateParametersForFactory.json
 └── README.md
