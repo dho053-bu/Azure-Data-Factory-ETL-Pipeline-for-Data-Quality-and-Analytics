@@ -35,13 +35,13 @@ The pipeline processes structured datasets, applies data cleaning and validation
 - Data type consistency checks
 - Row count validation
 
-.
+## Repository Structure
+
 ├── factory/                 # ADF pipeline configurations
 ├── linkedTemplates/         # ARM template dependencies
 ├── ARMTemplateForFactory.json
 ├── ARMTemplateParametersForFactory.json
 └── README.md
----
 
 ## Results
 This pipeline improves data reliability and ensures consistent, high-quality data for downstream analytics and reporting.
